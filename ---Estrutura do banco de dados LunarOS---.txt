@@ -1,0 +1,59 @@
+<---Estrutura do banco de dados--->
+
+CREATE DATABASE lunaros;
+use lunarOs;
+
+CREATE TABLE usuario (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    cargo VARCHAR(50) NOT NULL,
+    papel VARCHAR(20) CHECK (papel IN ('SOLICITANTE', 'TECNICO', 'SUPERVISOR', 'DIRETOR'))
+);
+
+CREATE TABLE usuario_tecnico (
+    id BIGINT PRIMARY KEY,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    senha VARCHAR(100) NOT NULL,
+    FOREIGN KEY (id) REFERENCES usuario(id)
+);
+
+CREATE TABLE chamado (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    data_abertura TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    solicitante_id BIGINT NOT NULL,
+    destinatario_id BIGINT NOT NULL,
+    natureza VARCHAR(50),
+    observacao TEXT,
+    status VARCHAR(20) CHECK (status IN ('ABERTO', 'EM_ATENDIMENTO', 'FINALIZADO', 'REABERTO')),
+    chamado_original_id BIGINT,
+    agendamento TIMESTAMP,
+
+    FOREIGN KEY (solicitante_id) REFERENCES usuario(id),
+    FOREIGN KEY (destinatario_id) REFERENCES usuario_tecnico(id),
+    FOREIGN KEY (chamado_original_id) REFERENCES chamado(id)
+);
+
+CREATE TABLE atendimento (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    chamado_id BIGINT NOT NULL,
+    tecnico_id BIGINT NOT NULL,
+    inicio TIMESTAMP,
+    fim TIMESTAMP,
+    tempo_total INT,
+    historico TEXT,
+    
+    FOREIGN KEY (chamado_id) REFERENCES chamado(id),
+    FOREIGN KEY (tecnico_id) REFERENCES usuario_tecnico(id)
+);
+
+CREATE TABLE avaliacao (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    chamado_id BIGINT NOT NULL,
+    solicitante_id BIGINT NOT NULL,
+    nota INT CHECK (nota BETWEEN 0 AND 10),
+    comentario TEXT,
+    data_avaliacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (chamado_id) REFERENCES chamado(id),
+    FOREIGN KEY (solicitante_id) REFERENCES usuario(id)
+);
